@@ -1,15 +1,32 @@
 from dataclasses import dataclass
 from typing import List
+from io import BytesIO
+
+
+@dataclass()
+class GPMFRecord:
+    fourcc: str
+    data_type: str
+    data: List[bytes]
+
+    def decode_contents(self):
+        if self.data_type == "\x00":
+            return GPMF(BytesIO(b"".join(self.data)))
+        return ""
 
 
 class GPMF:
     def __init__(self, f):
         self.f = f
         self.data = []
-        self.data.append(self._read_klv())
 
-    def _read_klv(self):
+        while data := self._read_klv():
+            self.data.append(data)
+
+    def _read_klv(self) -> GPMFRecord | None:
         fourcc = self.f.read(4).decode("utf-8")
+        if fourcc == "":
+            return None
         data_type = self.f.read(1).decode("utf-8")
         data_size = int.from_bytes(self.f.read(1))
         data_repeat = int.from_bytes(self.f.read(2))
@@ -24,11 +41,7 @@ class GPMF:
         return GPMFRecord(fourcc, data_type, data)
 
     def __repr__(self):
-        return self.data.__repr__()
-
-
-@dataclass()
-class GPMFRecord:
-    fourcc: str
-    data_type: str
-    data: List[bytes]
+        out = ""
+        for data in self.data:
+            out += data.decode_contents().__repr__()
+        return out
