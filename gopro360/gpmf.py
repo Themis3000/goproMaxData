@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Callable
 from io import BytesIO
 import struct
 
@@ -8,19 +8,27 @@ import struct
 class UnpackType:
     unpack_str: str
     size: int
+    post_process: Callable[[any], any] = None
 
     def get_unpack_str(self, data):
         count = len(data) // self.size
         return f"{count}{self.unpack_str}"
 
+    def unpack_data(self, data):
+        unpack_str = self.get_unpack_str(data[0])
+        data_out = [struct.unpack(unpack_str, data) for data in data]
+        if self.post_process is not None:
+            return [tuple(self.post_process(tuple_element) for tuple_element in tuple_data) for tuple_data in data_out]
+        return data_out
+
 
 unpack_lookup = {
     "b": UnpackType("b", 1),
     "B": UnpackType("B", 1),
-    "c": UnpackType("s", 1),
+    "c": UnpackType("s", 1, lambda x: x.decode("ASCII", errors="ignore")),
     "d": UnpackType("d", 8),
     "f": UnpackType("f", 4),
-    "F": UnpackType("s", 1),
+    "F": UnpackType("s", 1, lambda x: x.decode("ASCII", errors="ignore")),
     "j": UnpackType("q", 8),
     "J": UnpackType("Q", 8),
     "l": UnpackType("l", 4),
@@ -41,10 +49,9 @@ class GPMFRecord:
             return GPMF(BytesIO(b"".join(data)))
 
         if self.data_type in unpack_lookup:
-            unpack_str = unpack_lookup[self.data_type].get_unpack_str(data[0])
-        else:
-            return ["not implemented"]
-        return [struct.unpack(unpack_str, data) for data in data]
+            unpack_type = unpack_lookup[self.data_type]
+            return unpack_type.unpack_data(data)
+        return [("not implemented",)]
 
 
 class GPMF:
@@ -76,4 +83,12 @@ class GPMF:
         out = ""
         for data in self.data:
             out += f"{data.fourcc}, {data.data_type}: {data.contents.__repr__()}\n"
+        return out
+
+    def to_dict(self):
+        out = []
+        for data in self.data:
+            if isinstance(data.contents, GPMF):
+                out.append({"key": data.fourcc, "type": data.data_type, "content": data.contents.to_dict()})
+            out.append({"key": data.fourcc, "type": data.data_type, "content": data.contents})
         return out
