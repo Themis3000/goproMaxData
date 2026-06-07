@@ -1,6 +1,33 @@
 from dataclasses import dataclass
 from typing import List
 from io import BytesIO
+import struct
+
+
+@dataclass()
+class UnpackType:
+    unpack_str: str
+    size: int
+
+    def get_unpack_str(self, data):
+        count = len(data) // self.size
+        return f"{count}{self.unpack_str}"
+
+
+unpack_lookup = {
+    "b": UnpackType("b", 1),
+    "B": UnpackType("B", 1),
+    "c": UnpackType("p", 1),
+    "d": UnpackType("d", 8),
+    "f": UnpackType("f", 4),
+    "F": UnpackType("p", 1),
+    "j": UnpackType("q", 8),
+    "J": UnpackType("Q", 8),
+    "l": UnpackType("l", 4),
+    "L": UnpackType("L", 4),
+    "s": UnpackType("h", 2),
+    "S": UnpackType("H", 2)
+}
 
 
 @dataclass()
@@ -12,13 +39,12 @@ class GPMFRecord:
     def decode_contents(self):
         if self.data_type == "\x00":
             return GPMF(BytesIO(b"".join(self.data)))
-        if self.data_type == "b":
-            return [int.from_bytes(data, signed=True) for data in self.data]
-        if self.data_type == "B":
-            return [int.from_bytes(data, signed=False) for data in self.data]
-        if self.data_type == "c":
-            return b"".join(self.data).decode("ASCII", errors="ignore")
-        return ""
+
+        if self.data_type in unpack_lookup:
+            unpack_str = unpack_lookup[self.data_type].get_unpack_str(self.data[0])
+        else:
+            return ["not implemented"]
+        return [struct.unpack(unpack_str, data) for data in self.data]
 
 
 class GPMF:
