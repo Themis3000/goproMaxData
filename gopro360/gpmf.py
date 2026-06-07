@@ -90,5 +90,6 @@ class GPMF:
         for data in self.data:
             if isinstance(data.contents, GPMF):
                 out.append({"key": data.fourcc, "type": data.data_type, "content": data.contents.to_dict()})
+                continue
             out.append({"key": data.fourcc, "type": data.data_type, "content": data.contents})
         return out
