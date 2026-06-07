@@ -17,10 +17,10 @@ class UnpackType:
 unpack_lookup = {
     "b": UnpackType("b", 1),
     "B": UnpackType("B", 1),
-    "c": UnpackType("p", 1),
+    "c": UnpackType("s", 1),
     "d": UnpackType("d", 8),
     "f": UnpackType("f", 4),
-    "F": UnpackType("p", 1),
+    "F": UnpackType("s", 1),
     "j": UnpackType("q", 8),
     "J": UnpackType("Q", 8),
     "l": UnpackType("l", 4),
@@ -30,21 +30,21 @@ unpack_lookup = {
 }
 
 
-@dataclass()
 class GPMFRecord:
-    fourcc: str
-    data_type: str
-    data: List[bytes]
+    def __init__(self, fourcc: str, data_type: str, data: List[bytes]):
+        self.fourcc = fourcc
+        self.data_type = data_type
+        self.contents = self._decode_contents(data)
 
-    def decode_contents(self):
+    def _decode_contents(self, data):
         if self.data_type == "\x00":
-            return GPMF(BytesIO(b"".join(self.data)))
+            return GPMF(BytesIO(b"".join(data)))
 
         if self.data_type in unpack_lookup:
-            unpack_str = unpack_lookup[self.data_type].get_unpack_str(self.data[0])
+            unpack_str = unpack_lookup[self.data_type].get_unpack_str(data[0])
         else:
             return ["not implemented"]
-        return [struct.unpack(unpack_str, data) for data in self.data]
+        return [struct.unpack(unpack_str, data) for data in data]
 
 
 class GPMF:
@@ -75,5 +75,5 @@ class GPMF:
     def __repr__(self):
         out = ""
         for data in self.data:
-            out += f"{data.fourcc}, {data.data_type}: {data.decode_contents().__repr__()}\n"
+            out += f"{data.fourcc}, {data.data_type}: {data.contents.__repr__()}\n"
         return out
