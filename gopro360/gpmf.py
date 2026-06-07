@@ -12,6 +12,12 @@ class GPMFRecord:
     def decode_contents(self):
         if self.data_type == "\x00":
             return GPMF(BytesIO(b"".join(self.data)))
+        if self.data_type == "b":
+            return [int.from_bytes(data, signed=True) for data in self.data]
+        if self.data_type == "B":
+            return [int.from_bytes(data, signed=False) for data in self.data]
+        if self.data_type == "c":
+            return b"".join(self.data).decode("ASCII", errors="ignore")
         return ""
 
 
@@ -43,5 +49,5 @@ class GPMF:
     def __repr__(self):
         out = ""
         for data in self.data:
-            out += data.decode_contents().__repr__()
+            out += f"{data.fourcc}, {data.data_type}: {data.decode_contents().__repr__()}\n"
         return out
