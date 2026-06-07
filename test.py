@@ -1,7 +1,5 @@
-from glob import glob
-from gopro360 import GoPro360File
+from gopro360 import GPMF
 
-file_paths = glob("./test_input/*.360")
-for file_path in file_paths:
-    file = GoPro360File(file_path)
-    print(file)
+file = open("./test_data/track2.bin", "rb")
+gpmf = GPMF(file)
+print(gpmf)
