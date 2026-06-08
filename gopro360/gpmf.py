@@ -61,7 +61,7 @@ class GPMFRecord:
 class GPMF:
     def __init__(self, f):
         self.f = f
-        self.data = []
+        self.data: List[GPMFRecord] = []
 
         while data := self._read_klv():
             self.data.append(data)
