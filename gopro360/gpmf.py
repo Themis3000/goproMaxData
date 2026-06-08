@@ -79,12 +79,6 @@ class GPMF:
             self.f.seek(4 - four_distance, 1)
         return GPMFRecord(fourcc, data_type, data)
 
-    def __repr__(self):
-        out = ""
-        for data in self.data:
-            out += f"{data.fourcc}, {data.data_type}: {data.contents.__repr__()}\n"
-        return out
-
     def to_dict(self):
         out = []
         for data in self.data:
