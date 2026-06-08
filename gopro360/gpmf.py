@@ -1,3 +1,7 @@
+"""
+A partially complete parser of the GPMF format. Some data types such as UTC date/time are not implemented.
+"""
+
 from dataclasses import dataclass
 from typing import List, Callable
 from io import BytesIO
