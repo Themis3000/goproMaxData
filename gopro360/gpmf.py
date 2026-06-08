@@ -12,7 +12,7 @@ class UnpackType:
 
     def get_unpack_str(self, data):
         count = len(data) // self.size
-        return f"{count}{self.unpack_str}"
+        return f">{count}{self.unpack_str}"
 
     def unpack_data(self, data):
         unpack_str = self.get_unpack_str(data[0])
