@@ -1,0 +1,2 @@
+# Purpose
+In an effort to make the GoPro Max more useful for mapping, this project is meant to extract the relevant information out of GoPro Max .360 file. As a secondary goal, I'm trying to keep the amount of external dependencies as low as possible.
