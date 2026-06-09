@@ -1,5 +1,6 @@
+from typing import List
 import ffmpeg
-from .read_meta import get_meta
+from .read_meta import get_meta, GPSSample
 from .gpmf import GPMF
 
 
@@ -7,7 +8,7 @@ class GoPro360File:
     def __init__(self, file_path):
         self.file_path = file_path
 
-    def get_meta(self):
+    def get_meta(self) -> List[GPSSample]:
         probe = ffmpeg.probe(self.file_path)
         gpmf_stream_info = next((stream for stream in probe["streams"] if stream["codec_tag_string"] == "gpmd"), None)
         if gpmf_stream_info is None:
