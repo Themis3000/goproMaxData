@@ -1,9 +1,7 @@
-from gopro360 import GPMF, get_meta
+from gopro360 import GoPro360File
 
 
-with open("./test_data/track2.bin", "rb") as f:
-    gpmf = GPMF(f)
-
-gps_samples = get_meta(gpmf)
-
-print(gps_samples)
+file_path = "./test_data/GS010029.360"
+gopro = GoPro360File(file_path)
+meta = gopro.get_meta()
+print(meta)
