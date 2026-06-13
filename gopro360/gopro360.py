@@ -82,5 +82,12 @@ class GoPro360File:
     def read_cube_faces(self):
         for frame in self.read_frames():
             frame1_split = np.hsplit(frame[0], (1376, 2720))
-            blended = self._blend_face(frame1_split[0])
-            yield blended
+            frame2_split = np.hsplit(frame[0], (1376, 2720))
+            yield {
+                "left": self._blend_face(frame1_split[0]),
+                "forward": frame1_split[1],
+                "right": self._blend_face(frame1_split[2]),
+                "bottom": self._blend_face(frame2_split[0]),
+                "back": frame2_split[1],
+                "top": self._blend_face(frame2_split[2])
+            }
