@@ -71,7 +71,15 @@ class GoPro360File:
         process1.wait()
         process2.wait()
 
+    def _blend_face(self, face):
+        # TODO: Do actual blending.
+        face_split = np.hsplit(face, (672, 704))
+        face_join = np.hstack((face_split[0], face_split[2]))
+
+        return face_join
+
     def read_cube_faces(self):
         for frame in self.read_frames():
             frame1_split = np.hsplit(frame[0], (1376, 2720))
-            yield frame1_split
+            blended = self._blend_face(frame1_split[0])
+            yield blended

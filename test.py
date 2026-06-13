@@ -8,6 +8,4 @@ gopro = GoPro360File(file_path)
 
 faces = gopro.read_cube_faces()
 face = next(faces)
-Image.fromarray(face[0]).show()
-Image.fromarray(face[1]).show()
-Image.fromarray(face[2]).show()
+Image.fromarray(face).show()
