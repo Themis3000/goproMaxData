@@ -1,5 +1,6 @@
 from gopro360 import GoPro360File
 import time
+from PIL import Image
 
 
 file_path = "./test_data/GS010029.360"
@@ -8,6 +9,7 @@ frames = gopro.read_frames()
 
 for frame in frames:
     print("got frame")
-    print(frame)
-    time.sleep(2)
+    Image.fromarray(frame[0]).show()
+    Image.fromarray(frame[1]).show()
+    break
 

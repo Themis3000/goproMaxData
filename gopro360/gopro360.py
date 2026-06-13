@@ -51,9 +51,10 @@ class GoPro360File:
             .output("pipe:", format='rawvideo', pix_fmt="rgb24", **{'map': f"0:{stream_meta[1]['index']}"})
             .run_async(pipe_stdout=True)
         )
+        frame_size = 1344 * 4096 * 3
         while True:
-            in_bytes1 = process1.stdout.read(1344 * 4096 * 3)
-            in_bytes2 = process1.stdout.read(1344 * 4096 * 3)
+            in_bytes1 = process1.stdout.read(frame_size)
+            in_bytes2 = process2.stdout.read(frame_size)
             if not in_bytes1:
                 break
             frame1 = (
