@@ -70,3 +70,8 @@ class GoPro360File:
             yield frame1, frame2
         process1.wait()
         process2.wait()
+
+    def read_cube_faces(self):
+        for frame in self.read_frames():
+            frame1_split = np.hsplit(frame[0], (1376, 2720))
+            yield frame1_split

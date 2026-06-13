@@ -5,11 +5,9 @@ from PIL import Image
 
 file_path = "./test_data/GS010029.360"
 gopro = GoPro360File(file_path)
-frames = gopro.read_frames()
 
-for frame in frames:
-    print("got frame")
-    Image.fromarray(frame[0]).show()
-    Image.fromarray(frame[1]).show()
-    break
-
+faces = gopro.read_cube_faces()
+face = next(faces)
+Image.fromarray(face[0]).show()
+Image.fromarray(face[1]).show()
+Image.fromarray(face[2]).show()
