@@ -3,6 +3,7 @@ import ffmpeg
 import numpy as np
 from .read_meta import get_meta, GPSSample
 from .gpmf import GPMF
+from typing import Tuple
 
 
 class GoPro360File:
@@ -27,18 +28,34 @@ class GoPro360File:
         process.wait()
         return get_meta(gpmf)
 
-    def read_frames(self) -> np.array:
+    def read_frames(self):
         process = (
             ffmpeg
             .input(self.file_path)
             .output("pipe:", format='rawvideo', pix_fmt="rgb24")
             .run_async(pipe_stdout=True)
         )
-        while in_bytes := process.stdout.read(1344*4096*3):
+        process2 = (
+            ffmpeg
+            .input(self.file_path)
+            .output("pipe:", format='rawvideo', pix_fmt="rgb24", **{'map': "0:4"})
+            .run_async(pipe_stdout=True)
+        )
+        while True:
+            in_bytes = process.stdout.read(1344 * 4096 * 3)
+            in_bytes2 = process.stdout.read(1344 * 4096 * 3)
+            if not in_bytes:
+                break
             frame = (
                 np
                 .frombuffer(in_bytes, np.uint8)
                 .reshape([1344, 4096, 3])
             )
-            yield frame
+            frame2 = (
+                np
+                .frombuffer(in_bytes2, np.uint8)
+                .reshape([1344, 4096, 3])
+            )
+            yield frame, frame2
         process.wait()
+        process2.wait()
