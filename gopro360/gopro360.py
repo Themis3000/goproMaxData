@@ -71,7 +71,8 @@ class GoPro360File:
         process1.wait()
         process2.wait()
 
-    def _blend_face(self, face):
+    @staticmethod
+    def _blend_face(face):
         # TODO: Do actual blending.
         face_split = np.hsplit(face, (672, 704))
         face_join = np.hstack((face_split[0], face_split[2]))
