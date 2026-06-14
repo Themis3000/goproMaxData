@@ -2,6 +2,7 @@ from typing import List
 import ffmpeg
 import numpy as np
 import py360convert
+from PIL import Image
 from .read_meta import get_meta, GPSSample
 from .gpmf import GPMF
 
@@ -96,3 +97,7 @@ class GoPro360File:
     def read_equi_frames(self):
         for cube_dict in self.read_cube_faces():
             yield py360convert.c2e(cube_dict, 2880, 5760, cube_format="dict")
+
+    def read_360_images(self):
+        for equi_frame in self.read_equi_frames():
+            yield Image.fromarray(equi_frame)

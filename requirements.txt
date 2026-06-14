@@ -1,3 +1,4 @@
 ffmpeg-python
-numpy
-py360convert
+numpy~=2.4.6
+py360convert~=1.0.4
+pillow~=12.2.0
