@@ -1,6 +1,7 @@
 from typing import List
 import ffmpeg
 import numpy as np
+import py360convert
 from .read_meta import get_meta, GPSSample
 from .gpmf import GPMF
 
@@ -82,12 +83,16 @@ class GoPro360File:
     def read_cube_faces(self):
         for frame in self.read_frames():
             frame1_split = np.hsplit(frame[0], (1376, 2720))
-            frame2_split = np.hsplit(frame[0], (1376, 2720))
+            frame2_split = np.hsplit(frame[1], (1376, 2720))
             yield {
-                "left": self._blend_face(frame1_split[0]),
-                "forward": frame1_split[1],
-                "right": self._blend_face(frame1_split[2]),
-                "bottom": self._blend_face(frame2_split[0]),
-                "back": frame2_split[1],
-                "top": self._blend_face(frame2_split[2])
+                "L": self._blend_face(frame1_split[0]),
+                "F": frame1_split[1],
+                "R": self._blend_face(frame1_split[2]),
+                "D": np.rot90(self._blend_face(frame2_split[0]), 3),
+                "B": np.rot90(frame2_split[1]),
+                "U": np.rot90(self._blend_face(frame2_split[2]), 3)
             }
+
+    def read_equi_frames(self):
+        for cube_dict in self.read_cube_faces():
+            yield py360convert.c2e(cube_dict, 2880, 5760, cube_format="dict")
