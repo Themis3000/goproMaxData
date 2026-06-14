@@ -2,8 +2,15 @@ import ffmpeg
 import numpy as np
 import py360convert
 from PIL import Image
-from .read_meta import get_meta, GoProMeta
+from dataclasses import dataclass
+from .read_meta import get_sensor_data, SensorData
 from .gpmf import GPMF
+
+
+@dataclass
+class GoProMeta:
+    sensors: SensorData
+    framerate: float
 
 
 class GoPro360File:
@@ -27,8 +34,13 @@ class GoPro360File:
 
         gpmf = GPMF(process.stdout)
         process.wait()
-        meta = get_meta(gpmf)
-        return meta
+        sensor_data = get_sensor_data(gpmf)
+
+        frame_rate_str = probe["streams"][0]["avg_frame_rate"]
+        numerator, denominator = frame_rate_str.split("/")
+        frame_rate = int(numerator) / int(denominator)
+
+        return GoProMeta(sensor_data, frame_rate)
 
     def get_video_streams(self):
         """Returns metadata for the two video streams"""

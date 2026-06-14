@@ -4,7 +4,7 @@ file_path = "./test_data/GS010029.360"
 gopro = GoPro360File(file_path)
 
 meta = gopro.get_meta()
-gps_data = meta.gps
+gps_data = meta.sensors.gps
 
 
 def interpolate(x1, y1, x2, y2, percent):
