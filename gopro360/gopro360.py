@@ -1,9 +1,8 @@
-from typing import List
 import ffmpeg
 import numpy as np
 import py360convert
 from PIL import Image
-from .read_meta import get_meta, GPSSample
+from .read_meta import get_meta, GoProMeta
 from .gpmf import GPMF
 
 
@@ -11,7 +10,7 @@ class GoPro360File:
     def __init__(self, file_path):
         self.file_path = file_path
 
-    def get_meta(self) -> List[GPSSample]:
+    def get_meta(self) -> GoProMeta:
         """Gets GPMF metadata (contains sensor information)"""
         probe = ffmpeg.probe(self.file_path)
         gpmf_stream_info = next((stream for stream in probe["streams"] if stream["codec_tag_string"] == "gpmd"), None)
@@ -28,7 +27,8 @@ class GoPro360File:
 
         gpmf = GPMF(process.stdout)
         process.wait()
-        return get_meta(gpmf)
+        meta = get_meta(gpmf)
+        return meta
 
     def get_video_streams(self):
         """Returns metadata for the two video streams"""

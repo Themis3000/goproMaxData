@@ -3,7 +3,8 @@ from gopro360 import GoPro360File
 file_path = "./test_data/GS010029.360"
 gopro = GoPro360File(file_path)
 
-gps_data = gopro.get_meta()
+meta = gopro.get_meta()
+gps_data = meta.gps
 
 
 def interpolate(x1, y1, x2, y2, percent):

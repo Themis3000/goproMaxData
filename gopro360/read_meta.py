@@ -18,6 +18,11 @@ class GPSSample:
     gps_precision: int
 
 
+@dataclass
+class GoProMeta:
+    gps: List[GPSSample]
+
+
 def keyify_stream(stream: GPMFRecord):
     data_out = {}
     for value in stream.contents.data:
@@ -25,7 +30,7 @@ def keyify_stream(stream: GPMFRecord):
     return data_out
 
 
-def get_meta(gpmf: GPMF):
+def get_meta(gpmf: GPMF) -> GoProMeta:
     gps_samples: List[GPSSample] = []
     for frame in gpmf.data:
         for stream in frame.contents.data:
@@ -45,4 +50,4 @@ def get_meta(gpmf: GPMF):
                 gps_precision=stream_data["GPSP"][0][0]
             )
             gps_samples.append(sample)
-    return gps_samples
+    return GoProMeta(gps_samples)
