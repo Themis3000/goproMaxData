@@ -16,6 +16,7 @@ class GoProMeta:
 class GoPro360File:
     def __init__(self, file_path):
         self.file_path = file_path
+        self.meta = self.get_meta()
 
     def get_meta(self) -> GoProMeta:
         """Gets GPMF metadata (contains sensor information)"""
@@ -113,3 +114,32 @@ class GoPro360File:
     def read_360_images(self):
         for equi_frame in self.read_equi_frames():
             yield Image.fromarray(equi_frame)
+
+    @staticmethod
+    def _interpolate(x1, y1, x2, y2, percent):
+        """
+        Interpolates a position that lays *percent* from x1,y1 to x2,y2
+        Visual explanation: https://www.desmos.com/calculator/rartg26hmt
+        """
+        x3 = (((x2 - x1) / 100) * percent) + x1
+        y3 = (((y2 - y1) / 100) * percent) + y1
+        return x3, y3
+
+    def get_location_at_ts(self, timestamp: int):
+        """
+        Gets the GPS location at a given timestamp. Timestamp is in microseconds. The location is interpolated between
+        the closest gps sample before and after the given timestamp.
+        """
+        gps_data = self.meta.sensors.gps
+        gps_data.sort(key=lambda x: abs(x.time_micro_s - timestamp))
+        close_before = next((point for point in gps_data if timestamp > point.time_micro_s), gps_data[0])
+        close_after = next((point for point in gps_data if timestamp < point.time_micro_s), gps_data[-1])
+
+        percent = (timestamp - close_before.time_micro_s) / (
+                close_after.time_micro_s - close_before.time_micro_s) * 100
+
+        adjusted_lat, adjusted_long = self._interpolate(close_before.lat, close_before.long,
+                                                        close_after.lat, close_after.long,
+                                                        percent)
+
+        return adjusted_lat / 100000000000000, adjusted_long / 100000000000000
