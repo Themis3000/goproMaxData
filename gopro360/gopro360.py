@@ -14,6 +14,8 @@ class GoProMeta:
     sensors: SensorData
     framerate: float
     device_name: str
+    image_width: int
+    image_height: int
 
 
 @dataclass
@@ -55,7 +57,10 @@ class GoPro360File:
         numerator, denominator = frame_rate_str.split("/")
         frame_rate = int(numerator) / int(denominator)
 
-        return GoProMeta(sensor_data, frame_rate, device_name)
+        width = probe["streams"][0]["width"]
+        height = probe["streams"][0]["height"]
+
+        return GoProMeta(sensor_data, frame_rate, device_name, width, height)
 
     def get_video_streams(self):
         """Returns metadata for the two video streams"""
@@ -80,7 +85,7 @@ class GoPro360File:
             .output("pipe:", format='rawvideo', pix_fmt="rgb24", **{'map': f"0:{stream_meta[1]['index']}"})
             .run_async(pipe_stdout=True)
         )
-        frame_size = 1344 * 4096 * 3
+        frame_size = self.meta.image_width * self.meta.image_height * 3
         while True:
             in_bytes1 = process1.stdout.read(frame_size)
             in_bytes2 = process2.stdout.read(frame_size)
@@ -89,12 +94,12 @@ class GoPro360File:
             frame1 = (
                 np
                 .frombuffer(in_bytes1, np.uint8)
-                .reshape([1344, 4096, 3])
+                .reshape([self.meta.image_height, self.meta.image_width, 3])
             )
             frame2 = (
                 np
                 .frombuffer(in_bytes2, np.uint8)
-                .reshape([1344, 4096, 3])
+                .reshape([self.meta.image_height, self.meta.image_width, 3])
             )
             yield frame1, frame2
         process1.wait()
