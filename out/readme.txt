@@ -1,0 +1,1 @@
+Your image output will appear in this folder after running the script.

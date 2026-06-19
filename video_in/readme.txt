@@ -1,0 +1,1 @@
+Place your .360 videos to be processed in this folder
