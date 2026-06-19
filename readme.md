@@ -15,6 +15,8 @@ If you are an OSM contributor and would like additional help with setup or have 
 - The processing time is a little bit slow
   - About 2-3 frames/s on my Ryzen 5 2600 system
   - Has the potential to be optimized a bit if it becomes important
+- Only supports the gopro max 1
+  - If you have a max 2, reach out and send me a sample video file. I can probably add support for the max 2.
 - The bearing isn't recorded.
   - I haven't looked into doing this quite yet.
 - Doesn't automatically read the frames/sec from input files, it needs to be manually entered.
