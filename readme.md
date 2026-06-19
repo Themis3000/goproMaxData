@@ -15,6 +15,8 @@ If you are an OSM contributor and would like additional help with setup or have 
 - The processing time is a little bit slow
   - About 2-3 frames/s on my Ryzen 5 2500 system
   - Has the potential to be optimized a bit if it becomes important
+- The bearing isn't recorded.
+  - I haven't looked into doing this quite yet.
 - Doesn't automatically read the frames/sec from input files, it needs to be manually entered.
   - It's not an impossible feat to read the frames/sec, I just don't know how to do it yet.
 - Accuracy of output hasn't been thoroughly tested yet.
