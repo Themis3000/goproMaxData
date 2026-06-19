@@ -13,7 +13,7 @@ If you are an OSM contributor and would like additional help with setup or have 
 
 # Shortcomings
 - The processing time is a little bit slow
-  - About 2-3 frames/s on my Ryzen 5 2500 system
+  - About 2-3 frames/s on my Ryzen 5 2600 system
   - Has the potential to be optimized a bit if it becomes important
 - The bearing isn't recorded.
   - I haven't looked into doing this quite yet.
