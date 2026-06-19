@@ -38,7 +38,8 @@ unpack_lookup = {
     "l": UnpackType("l", 4),
     "L": UnpackType("L", 4),
     "s": UnpackType("h", 2),
-    "S": UnpackType("H", 2)
+    "S": UnpackType("H", 2),
+    "U": UnpackType("s", 1, lambda x: x.decode("ASCII", errors="ignore"))
 }
 
 

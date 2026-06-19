@@ -4,6 +4,7 @@ Processes a GPMF object and returns some of the containing metadata in a high le
 from dataclasses import dataclass
 from .gpmf import GPMFRecord, GPMF
 from typing import List
+from datetime import datetime, timedelta
 
 
 @dataclass()
@@ -16,6 +17,12 @@ class GPSSample:
     time_micro_s: int
     sample_num: int
     gps_precision: int
+    utc_time: str
+
+    def get_datetime(self):
+        time = datetime.strptime(self.utc_time[:-4], "%y%m%d%H%M%S")
+        time += timedelta(milliseconds=int(self.utc_time[-3:]))
+        return time
 
 
 @dataclass
@@ -47,7 +54,8 @@ def get_sensor_data(gpmf: GPMF) -> SensorData:
                 speed3d=stream_data["GPS5"][0][4] * stream_data["SCAL"][4][0],
                 time_micro_s=stream_data["STMP"][0][0],
                 sample_num=stream_data["TSMP"][0][0],
-                gps_precision=stream_data["GPSP"][0][0]
+                gps_precision=stream_data["GPSP"][0][0],
+                utc_time=stream_data["GPSU"][0][0]
             )
             gps_samples.append(sample)
     return SensorData(gps_samples)
