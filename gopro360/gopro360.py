@@ -135,6 +135,9 @@ class GoPro360File:
         close_before = next((point for point in gps_data if timestamp > point.time_micro_s), gps_data[0])
         close_after = next((point for point in gps_data if timestamp < point.time_micro_s), gps_data[-1])
 
+        if close_before == close_after:
+            return close_before.lat / 100000000000000, close_before.long / 100000000000000
+
         percent = (timestamp - close_before.time_micro_s) / (
                 close_after.time_micro_s - close_before.time_micro_s) * 100
 
