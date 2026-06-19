@@ -80,7 +80,7 @@ class GoPro360File:
         while True:
             in_bytes1 = process1.stdout.read(frame_size)
             in_bytes2 = process2.stdout.read(frame_size)
-            if len(in_bytes1) == 0:
+            if len(in_bytes1) == 0 or in_bytes2 == 0:
                 break
             frame1 = (
                 np
