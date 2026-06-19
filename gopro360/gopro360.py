@@ -108,15 +108,21 @@ class GoPro360File:
     @staticmethod
     def _blend_face(face):
         # TODO: Do actual blending.
-        face_split = np.hsplit(face, (672, 704))
+        overlap = face.shape[1] - face.shape[0]
+        cut_amount = overlap // 2
+        half_input_width = face.shape[1] // 2
+        split_locations = (half_input_width - cut_amount, half_input_width + cut_amount)
+        face_split = np.hsplit(face, split_locations)
         face_join = np.hstack((face_split[0], face_split[2]))
 
         return face_join
 
     def read_cube_faces(self):
+        overlap_amount = (self.meta.image_width - (self.meta.image_height * 3)) // 2
+        split_locations = (self.meta.image_height + overlap_amount, (self.meta.image_height * 2) + overlap_amount)
         for frame in self.read_frames():
-            frame1_split = np.hsplit(frame[0], (1376, 2720))
-            frame2_split = np.hsplit(frame[1], (1376, 2720))
+            frame1_split = np.hsplit(frame[0], split_locations)
+            frame2_split = np.hsplit(frame[1], split_locations)
             yield {
                 "L": self._blend_face(frame1_split[0]),
                 "F": frame1_split[1],
