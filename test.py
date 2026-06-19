@@ -13,5 +13,5 @@ frame_time = int(frame_time_parts[0]) / int(frame_time_parts[1])
 
 for frame_num, image in enumerate(gopro.read_360_images()):
     time_ns = int(frame_num * frame_time * 1000000)
-    lat, long = gopro.get_location_at_ts(time_ns)
-    store_image(image, lat, long, datetime.now(), f"./out/{frame_num}.jpg")
+    gpsData = gopro.get_gps_at_ts(time_ns)
+    store_image(image, gpsData.lat, gpsData.long, gpsData.gpsTime, f"./out/{frame_num}.jpg")

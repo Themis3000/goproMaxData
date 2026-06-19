@@ -1,3 +1,5 @@
+import datetime
+
 import ffmpeg
 import numpy as np
 import py360convert
@@ -11,6 +13,14 @@ from .gpmf import GPMF
 class GoProMeta:
     sensors: SensorData
     framerate: float
+
+
+@dataclass
+class InterpolatedGPSData:
+    lat: float
+    long: float
+    gpsTime: datetime
+    accuracy: int
 
 
 class GoPro360File:
@@ -111,23 +121,22 @@ class GoPro360File:
         for cube_dict in self.read_cube_faces():
             yield py360convert.c2e(cube_dict, 2880, 5760, cube_format="dict")
 
-    def read_360_images(self):
+    def read_360_images(self) -> Image:
         for equi_frame in self.read_equi_frames():
             yield Image.fromarray(equi_frame)
 
     @staticmethod
-    def _interpolate(x1, y1, x2, y2, percent):
+    def _interpolate(x1, x2, percent) -> int:
         """
-        Interpolates a position that lays *percent* from x1,y1 to x2,y2
+        Interpolates a position that lays *percent* from x1 to x2
         Visual explanation: https://www.desmos.com/calculator/rartg26hmt
         """
         x3 = (((x2 - x1) / 100) * percent) + x1
-        y3 = (((y2 - y1) / 100) * percent) + y1
-        return x3, y3
+        return x3
 
-    def get_location_at_ts(self, timestamp: int):
+    def get_gps_at_ts(self, timestamp: int) -> InterpolatedGPSData:
         """
-        Gets the GPS location at a given timestamp. Timestamp is in microseconds. The location is interpolated between
+        Gets the GPS data at a given timestamp. Timestamp is in microseconds. The location is interpolated between
         the closest gps sample before and after the given timestamp.
         """
         gps_data = self.meta.sensors.gps
@@ -136,13 +145,25 @@ class GoPro360File:
         close_after = next((point for point in gps_data if timestamp < point.time_micro_s), gps_data[-1])
 
         if close_before == close_after:
-            return close_before.lat / 100000000000000, close_before.long / 100000000000000
+            return InterpolatedGPSData(lat=close_before.lat / 100000000000000,
+                                       long=close_before.long / 100000000000000,
+                                       gpsTime=close_before.get_datetime(),
+                                       accuracy=close_before.gps_precision)
 
         percent = (timestamp - close_before.time_micro_s) / (
                 close_after.time_micro_s - close_before.time_micro_s) * 100
 
-        adjusted_lat, adjusted_long = self._interpolate(close_before.lat, close_before.long,
-                                                        close_after.lat, close_after.long,
-                                                        percent)
+        adjusted_lat = self._interpolate(close_before.lat, close_after.lat, percent)
+        adjusted_long = self._interpolate(close_before.long, close_after.long, percent)
 
-        return adjusted_lat / 100000000000000, adjusted_long / 100000000000000
+        adjusted_timestamp = self._interpolate(close_before.get_datetime().timestamp(),
+                                               close_after.get_datetime().timestamp(),
+                                               percent)
+        adjusted_datetime = datetime.datetime.fromtimestamp(adjusted_timestamp)
+
+        accuracy = min(close_before.gps_precision, close_after.gps_precision)
+
+        return InterpolatedGPSData(lat=adjusted_lat / 100000000000000,
+                                   long=adjusted_long / 100000000000000,
+                                   gpsTime=adjusted_datetime,
+                                   accuracy=accuracy)
