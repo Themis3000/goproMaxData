@@ -13,6 +13,7 @@ from .gpmf import GPMF
 class GoProMeta:
     sensors: SensorData
     framerate: float
+    device_name: str
 
 
 @dataclass
@@ -47,11 +48,14 @@ class GoPro360File:
         process.wait()
         sensor_data = get_sensor_data(gpmf)
 
+        device_name_record = next((record for record in gpmf.data[0].contents.data if record.fourcc == "DVNM"))
+        device_name = device_name_record.contents[0][0]
+
         frame_rate_str = probe["streams"][0]["avg_frame_rate"]
         numerator, denominator = frame_rate_str.split("/")
         frame_rate = int(numerator) / int(denominator)
 
-        return GoProMeta(sensor_data, frame_rate)
+        return GoProMeta(sensor_data, frame_rate, device_name)
 
     def get_video_streams(self):
         """Returns metadata for the two video streams"""
