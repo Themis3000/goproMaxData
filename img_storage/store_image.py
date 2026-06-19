@@ -19,7 +19,7 @@ def dec_deg_to_dms(dd):
     return abs(int(degrees)), int(minutes), int(round(seconds, 2)*100)
 
 
-def store_image(image: Image, lat: float, long: float, timestamp: datetime, file_path):
+def store_image(image: Image, lat: float, long: float, timestamp: datetime, file_path, quality=85):
     lat_deg, lat_min, lat_sec = dec_deg_to_dms(lat)
     long_deg, long_min, long_sec = dec_deg_to_dms(long)
 
@@ -47,4 +47,4 @@ def store_image(image: Image, lat: float, long: float, timestamp: datetime, file
     }
 
     exif_bytes = piexif.dump(exif_dict)
-    image.save(file_path, quality=80, exif=exif_bytes)
+    image.save(file_path, quality=quality, exif=exif_bytes)

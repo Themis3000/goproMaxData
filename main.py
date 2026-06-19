@@ -14,6 +14,7 @@ frame_time = int(frame_time_parts[0]) / int(frame_time_parts[1])
 
 allowable_precision = int(input("Enter the allowable gps precision (frames above this precision will be discarded. "
                                 "gopro recommends 500) > "))
+quality = int(input("Select your jpeg output quality (1-100) > "))
 
 for video_path in input_videos:
     file_name = Path(video_path).name
@@ -29,5 +30,5 @@ for video_path in input_videos:
         if gpsData.accuracy > allowable_precision:
             print(f"Skipping frame #{frame_num + 1} from {file_name} for having an accuracy of {gpsData.accuracy}")
             continue
-        store_image(image, gpsData.lat, gpsData.long, gpsData.gpsTime, f"./out/{file_name}/{frame_num}.jpg")
+        store_image(image, gpsData.lat, gpsData.long, gpsData.gpsTime, f"./out/{file_name}/{frame_num}.jpg", quality)
         print(f"Wrote frame #{frame_num + 1} from {file_name} (accuracy {gpsData.accuracy})")
