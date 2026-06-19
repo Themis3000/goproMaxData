@@ -12,6 +12,9 @@ frame_time_str = input("Enter frame timing (e.g. 1/1001, 1/2, etc) > ")
 frame_time_parts = frame_time_str.split("/")
 frame_time = int(frame_time_parts[0]) / int(frame_time_parts[1])
 
+allowable_precision = int(input("Enter the allowable gps precision (frames above this precision will be discarded. "
+                                "gopro recommends 500) > "))
+
 for video_path in input_videos:
     file_name = Path(video_path).name
     print(f"Loading {file_name}...")
@@ -23,5 +26,8 @@ for video_path in input_videos:
     for frame_num, image in enumerate(gopro.read_360_images()):
         time_ns = int(frame_num * frame_time * 1000000)
         gpsData = gopro.get_gps_at_ts(time_ns)
+        if gpsData.accuracy > allowable_precision:
+            print(f"Skipping frame #{frame_num + 1} from {file_name} for having an accuracy of {gpsData.accuracy}")
+            continue
         store_image(image, gpsData.lat, gpsData.long, gpsData.gpsTime, f"./out/{file_name}/{frame_num}.jpg")
-        print(f"Wrote frame #{frame_num+1} from {file_name}")
+        print(f"Wrote frame #{frame_num + 1} from {file_name} (accuracy {gpsData.accuracy})")
