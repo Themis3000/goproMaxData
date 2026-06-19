@@ -1,4 +1,3 @@
-from datetime import datetime
 from gopro360 import GoPro360File
 from img_storage import store_image
 

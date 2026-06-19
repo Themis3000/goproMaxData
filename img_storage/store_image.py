@@ -19,7 +19,7 @@ def dec_deg_to_dms(dd):
     return abs(int(degrees)), int(minutes), int(round(seconds, 2)*100)
 
 
-def store_image(image: Image, lat: int, long: int, timestamp: datetime, file_path):
+def store_image(image: Image, lat: float, long: float, timestamp: datetime, file_path):
     lat_deg, lat_min, lat_sec = dec_deg_to_dms(lat)
     long_deg, long_min, long_sec = dec_deg_to_dms(long)
 
